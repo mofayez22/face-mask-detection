@@ -1,0 +1,64 @@
+# Model Configuration
+model:
+  path: "model/best.pt"
+  device: "cpu"  # Options: "cpu", "cuda", "mps"
+  task: "detect"
+
+# Detection Settings
+detection:
+  default_conf: 0.5
+  default_iou: 0.45
+  min_conf: 0.0
+  max_conf: 1.0
+  conf_step: 0.05
+
+# Class Names (adjust based on your model)
+classes:
+  with_mask:
+    - "with_mask"
+    - "with mask"
+    - "mask_on"
+    - "wearing_mask"
+    - "masked"
+    - "mask"
+  
+  without_mask:
+    - "without_mask"
+    - "without mask"
+    - "no_mask"
+    - "no mask"
+    - "nomask"
+    - "mask_off"
+
+# Compliance Thresholds
+compliance:
+  high: 80  # >=80% is excellent
+  moderate: 50  # 50-79% is acceptable
+  low: 0  # <50% needs attention
+
+# UI Settings
+ui:
+  page_title: "AI Face Mask Detection System"
+  page_icon: "😷"
+  layout: "wide"
+  initial_sidebar_state: "expanded"
+  
+  # Color themes
+  colors:
+    primary: "#667eea"
+    secondary: "#764ba2"
+    success: "#10b981"
+    warning: "#f59e0b"
+    error: "#ef4444"
+
+# Export Settings
+export:
+  json_indent: 2
+  image_format: "PNG"
+  report_prefix: "report_"
+  image_prefix: "annotated_"
+
+# Logging
+logging:
+  level: "INFO"  # Options: DEBUG, INFO, WARNING, ERROR
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
