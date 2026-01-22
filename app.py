@@ -281,12 +281,19 @@ def main():
                 st.write("Frames detected by OpenCV:", frame_count)
 
             
+
             with open(output_video_path, "rb") as video_file:
                 video_bytes = video_file.read()
                 st.success("Done!")
                 st.video(video_bytes)
                 st.write("Output path:", output_video_path)
-
+            
+            st.download_button(
+            label="Download output video",
+            data=video_bytes,
+            file_name="output.mp4",
+            mime="video/mp4"
+            )    
 
             #st.success("Done!")
             #st.video(output_video_path)
