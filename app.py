@@ -259,13 +259,17 @@ def main():
         video_file = st.file_uploader("Upload a video", type=["mp4", "avi"])
 
         if video_file:
-            with open("input_video.mp4", "wb") as f:
-                f.write(video_file.read())
+            with st.spinner("Processing video... please wait ⏳"):
+        
 
-            st.info("Processing video... this may take a while ⏳")
-            output_video = process_video_locally(model, "input_video.mp4", conf_threshold)
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_vid:
+                    temp_vid.write(video_file.read())
+                    input_video_path = temp_vid.name
 
-            st.video(output_video)
+                output_video_path = process_video(model, input_video_path, conf_threshold)
+
+            st.success("Done!")
+            st.video(output_video_path)
 
         uploaded_file = st.file_uploader("Upload an image", type=['jpg', 'jpeg', 'png', 'bmp'])
 
