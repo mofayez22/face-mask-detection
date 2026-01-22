@@ -65,6 +65,34 @@ def load_model(model_path: str = MODEL_PATH, device: str = DEFAULT_DEVICE) -> Tu
         logger.error(error_msg)
         return None, error_msg
 
+### Video processing
+
+def run_inference_on_frame(model, frame, conf):
+    results = model(frame, conf=conf)[0]
+
+    annotated = frame.copy()
+
+    for box in results.boxes:
+        x1, y1, x2, y2 = map(int, box.xyxy[0])
+        cls_id = int(box.cls[0])
+        confidence = float(box.conf[0])
+
+        label = f"{model.names[cls_id]} {confidence:.2f}"
+        color = (0, 255, 0) if cls_id == 0 else (0, 0, 255)
+
+        cv2.rectangle(annotated, (x1, y1), (x2, y2), color, 2)
+        cv2.putText(
+            annotated,
+            label,
+            (x1, y1 - 10),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.6,
+            color,
+            2,
+        )
+
+    return annotated
+
 
 def run_inference(
     model: YOLO,

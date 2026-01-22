@@ -10,7 +10,8 @@ import os
 from inference import *
 import yaml
 import logging
-
+from inference import run_inference_on_frame
+from video_utils import *
 # Add this helper function to load config
 def load_config(config_path='config/config.yaml'):
     """Load configuration from YAML file"""
@@ -255,6 +256,17 @@ def main():
     tab1, tab2, tab3 = st.tabs(["📸 Detection", "📊 Analytics", "ℹ️ Instructions"])
 
     with tab1:
+        video_file = st.file_uploader("Upload a video", type=["mp4", "avi"])
+
+        if video_file:
+            with open("input_video.mp4", "wb") as f:
+                f.write(video_file.read())
+
+            st.info("Processing video... this may take a while ⏳")
+            output_video = process_video_locally(model, "input_video.mp4", conf_threshold)
+
+            st.video(output_video)
+
         uploaded_file = st.file_uploader("Upload an image", type=['jpg', 'jpeg', 'png', 'bmp'])
 
         if uploaded_file is not None:
