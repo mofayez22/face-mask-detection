@@ -2,19 +2,21 @@ import cv2
 import os
 import tempfile
 from inference import run_inference_on_frame
+import platform
 
-
-# video_utils.py
-
-import cv2
-import os
-import tempfile
-from inference import run_inference_on_frame
 
 
 def process_video(model, input_video_path, conf):
+    
+    if platform.system() == "Windows":
+        fourcc = cv2.VideoWriter_fourcc(*"XVID")
+        suffix = ".avi"
+    else:
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+        suffix = ".mp4"
+        
     temp_dir = tempfile.mkdtemp()
-    output_path = os.path.join(temp_dir, "output.avi")
+    output_path = os.path.join(temp_dir, f"output.{suffix}")
 
     cap = cv2.VideoCapture(input_video_path)
 
@@ -29,7 +31,9 @@ def process_video(model, input_video_path, conf):
     if not fps or fps <= 1:
         fps = 25
 
-    fourcc = cv2.VideoWriter_fourcc(*"XVID")
+    
+    
+
     out = cv2.VideoWriter(output_path, fourcc, fps, writer_size)
 
     if not out.isOpened():
