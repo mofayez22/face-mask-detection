@@ -271,9 +271,16 @@ def main():
                 st.write("Output path:", output_video_path)
                 st.write("File exists:", os.path.exists(output_video_path))
                 st.write("File size (bytes):", os.path.getsize(output_video_path))
+            
+            with open(output_video_path, "rb") as video_file:
+                video_bytes = video_file.read()
+                st.success("Done!")
+                st.video(video_bytes)
+                st.write("Output path:", output_video_path)
 
-            st.success("Done!")
-            st.video(output_video_path)
+
+            #st.success("Done!")
+            #st.video(output_video_path)
 
         uploaded_file = st.file_uploader("Upload an image", type=['jpg', 'jpeg', 'png', 'bmp'])
 
