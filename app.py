@@ -268,9 +268,18 @@ def main():
                     print(f"######################input video path: {input_video_path}###############")
 
                 output_video_path = process_video(model, input_video_path, conf_threshold)
-                st.write("Output path:", output_video_path)
-                st.write("File exists:", os.path.exists(output_video_path))
-                st.write("File size (bytes):", os.path.getsize(output_video_path))
+                cap = cv2.VideoCapture(output_video_path)
+                frame_count = 0
+                while True:
+                    ret, frame = cap.read()
+                    if not ret:
+                        break
+                    frame_count += 1
+
+                cap.release()
+
+                st.write("Frames detected by OpenCV:", frame_count)
+
             
             with open(output_video_path, "rb") as video_file:
                 video_bytes = video_file.read()
