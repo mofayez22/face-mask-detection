@@ -265,8 +265,10 @@ def main():
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_vid:
                     temp_vid.write(video_file.read())
                     input_video_path = temp_vid.name
+                    print(f"###################### {input_video_path}###############")
 
                 output_video_path = process_video(model, input_video_path, conf_threshold)
+                print(f"###################### output video path: {output_video_path}################")
 
             st.success("Done!")
             st.video(output_video_path)
