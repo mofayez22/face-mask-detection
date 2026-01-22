@@ -14,9 +14,9 @@ def process_video(model, input_video_path, conf):
     else:
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")
         suffix = ".mp4"
-        
+
     temp_dir = tempfile.mkdtemp()
-    output_path = os.path.join(temp_dir, f"output.{suffix}")
+    output_path = os.path.join(temp_dir, f"output{suffix}")
 
     cap = cv2.VideoCapture(input_video_path)
 
