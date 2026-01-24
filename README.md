@@ -1,6 +1,6 @@
 # 😷 AI Face Mask Detection System
 
-An End-to-end face mask detection system powered by YOLOv8 and Streamlit. This application detects whether people in images are wearing face masks and provides detailed analytics and compliance reports.
+An End-to-end face mask detection system powered by YOLOv8 and Streamlit. This application detects whether people in an image/video are wearing face masks and provides detailed analytics and compliance reports.
 
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.28%2B-red)
