@@ -23,8 +23,7 @@ def process_video(
     progress_bar=None,
     status_text=None
 ):
-    temp_dir = tempfile.mkdtemp()
-    output_path = os.path.join(temp_dir, f"output{suffix}")
+    output_path = os.path.join(tempfile.gettempdir(), f"output{suffix}")
 
     cap = cv2.VideoCapture(input_video_path)
 
