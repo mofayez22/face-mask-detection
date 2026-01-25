@@ -10,13 +10,17 @@ import os
 from inference import *
 import yaml
 import logging
+import platform
 from inference import run_inference_on_frame
+from analytics_utils import *
 from video_utils import *
+
+
 # Add this helper function to load config
-def load_config(config_path='config/config.yaml'):
+def load_config(config_path="config/config.yaml"):
     """Load configuration from YAML file"""
     try:
-        with open(config_path, 'r') as f:
+        with open(config_path, "r") as f:
             config = yaml.safe_load(f)
         return config
     except FileNotFoundError:
@@ -26,9 +30,11 @@ def load_config(config_path='config/config.yaml'):
         st.error(f"Error loading config: {str(e)}")
         return None
 
+
 # Add error boundary wrapper
 def safe_run(func):
     """Decorator for error handling"""
+
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
@@ -36,20 +42,22 @@ def safe_run(func):
             st.error(f"❌ An error occurred: {str(e)}")
             logging.error(f"Error in {func.__name__}: {str(e)}", exc_info=True)
             return None
+
     return wrapper
+
 
 # Add input validation
 def validate_image(image):
     """Validate uploaded image"""
     if image is None:
         return False, "No image provided"
-    
+
     # Check file size (limit to 10MB)
-    if hasattr(image, 'size'):
+    if hasattr(image, "size"):
         max_size = 10 * 1024 * 1024  # 10MB
         if image.size > max_size:
             return False, f"Image too large. Max size: {max_size/(1024*1024):.1f}MB"
-    
+
     # Check image dimensions
     try:
         img = PIL.Image.open(image)
@@ -58,51 +66,55 @@ def validate_image(image):
             return False, "Image dimensions too large. Max: 4096x4096"
     except Exception as e:
         return False, f"Invalid image: {str(e)}"
-    
+
     return True, None
+
 
 # Add logging configuration
 def setup_logging():
     """Setup logging configuration"""
     logging.basicConfig(
         level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.FileHandler('app.log'),
-            logging.StreamHandler()
-        ]
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        handlers=[logging.FileHandler("app.log"), logging.StreamHandler()],
     )
+
 
 # Add session state initialization
 def init_session_state():
     """Initialize session state variables"""
-    if 'detection_history' not in st.session_state:
+    if "detection_history" not in st.session_state:
         st.session_state.detection_history = []
-    if 'total_images_processed' not in st.session_state:
+    if "total_images_processed" not in st.session_state:
         st.session_state.total_images_processed = 0
+
 
 # Add performance metrics tracking
 def track_performance(func):
     """Track function execution time"""
     import time
+
     def wrapper(*args, **kwargs):
         start = time.time()
         result = func(*args, **kwargs)
         duration = time.time() - start
         st.session_state.last_inference_time = duration
         return result
+
     return wrapper
+
 
 # ==================== PAGE CONFIGURATION ====================
 st.set_page_config(
     page_title="AI Face Mask Detection System",
     page_icon="😷",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
 
 # ==================== CUSTOM CSS ====================
-st.markdown("""
+st.markdown(
+    """
     <style>
     .main-header {
         font-size: 2.5rem;
@@ -139,87 +151,54 @@ st.markdown("""
         border-radius: 8px;
     }
     </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 
 # ==================== HELPER FUNCTIONS ====================
-def analyze_detections(results, conf_threshold):
-    """Analyze detection results and categorize them"""
-    boxes = results[0].boxes
 
-    stats = {
-        'total_detections': 0,
-        'with_mask': 0,
-        'without_mask': 0,
-        'detections': []
-    }
-
-    # Process all boxes (YOLO already filtered by confidence)
-    for box in boxes:
-        conf = float(box.conf[0])
-        cls = int(box.cls[0])
-        cls_name = results[0].names[cls]
-
-        # Add to detections list
-        stats['detections'].append({
-            'class': cls_name,
-            'confidence': conf,
-            'bbox': box.xyxy[0].tolist()
-        })
-
-        stats['total_detections'] += 1
-
-        # Categorize based on class name - adjust these patterns to match YOUR model's class names
-        cls_lower = cls_name.lower()
-
-        # Check for "with mask" variations
-        if any(keyword in cls_lower for keyword in ['with_mask', 'with mask', 'mask_on', 'wearing_mask', 'masked']):
-            stats['with_mask'] += 1
-        # Check for "without mask" / "no mask" variations
-        elif any(keyword in cls_lower for keyword in ['without_mask', 'without mask', 'no_mask', 'no mask', 'nomask', 'mask_off']):
-            stats['without_mask'] += 1
-        # If class name just says "mask", assume it means "with mask"
-        elif cls_lower == 'mask':
-            stats['with_mask'] += 1
-        # Default fallback - you may need to adjust this
-        else:
-            # Print to help debug what class names your model uses
-            print(f"⚠️ Unknown class detected: '{cls_name}' - defaulting to 'without_mask'")
-            stats['without_mask'] += 1
-
-    return stats
 
 def calculate_compliance_rate(stats):
     """Calculate mask compliance percentage"""
-    total = stats['total_detections']
+    total = stats["total_detections"]
     if total == 0:
         return 0
-    compliant = stats['with_mask']
+    compliant = stats["with_mask"]
     return (compliant / total) * 100
+
 
 def export_results(stats, image_name):
     """Export detection results as JSON"""
     report = {
-        'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        'image_name': image_name,
-        'statistics': stats,
-        'compliance_rate': calculate_compliance_rate(stats)
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "image_name": image_name,
+        "statistics": stats,
+        "compliance_rate": calculate_compliance_rate(stats),
     }
     return json.dumps(report, indent=2)
+
 
 # ==================== MAIN APPLICATION ====================
 def main():
 
-    #Load config
+    # Load config
     config = load_config()
-    
+
     # Setup logging
     setup_logging()
-    
+
     # Initialize session state
     init_session_state()
 
-    st.markdown('<h1 class="main-header">😷 AI Face Mask Detection System</h1>', unsafe_allow_html=True)
+    if "video_processing_done" not in st.session_state:
+        st.session_state.video_processing_done = False
+
+
+    st.markdown(
+        '<h1 class="main-header">😷 AI Face Mask Detection System</h1>',
+        unsafe_allow_html=True,
+    )
     st.markdown("---")
 
     with st.sidebar:
@@ -246,12 +225,6 @@ def main():
 
     st.success("✅ Model loaded successfully!")
 
-    # Display model class names for debugging
-    with st.expander("🔍 Model Class Names (for debugging)"):
-        st.write("Your model recognizes these classes:")
-        for idx, name in model.names.items():
-            st.code(f"Class {idx}: {name}")
-        st.info("Make sure the analyze_detections() function matches these class names correctly!")
 
     tab1, tab2, tab3 = st.tabs(["📸 Detection", "📊 Analytics", "ℹ️ Instructions"])
 
@@ -259,46 +232,70 @@ def main():
         video_file = st.file_uploader("Upload a video", type=["mp4", "avi"])
 
         if video_file:
-            with st.spinner("Processing video... please wait ⏳"):
-        
+          
+            col1, col2 = st.columns(2)
 
-                with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_vid:
+            if platform == "windows":
+                fourcc = cv2.VideoWriter_fourcc(*"XVID")
+                suffix = ".avi"
+            else:
+                fourcc = cv2.VideoWriter_fourcc(*"mpv4")
+                suffix = ".mp4"
+            with col1:
+                st.subheader("🎥 Original Video")
+                with tempfile.NamedTemporaryFile(
+                    delete=False, suffix=suffix
+                ) as temp_vid:
                     temp_vid.write(video_file.read())
                     input_video_path = temp_vid.name
-                    print(f"######################input video path: {input_video_path}###############")
 
-                output_video_path = process_video(model, input_video_path, conf_threshold)
-                cap = cv2.VideoCapture(output_video_path)
-                frame_count = 0
-                while True:
-                    ret, frame = cap.read()
-                    if not ret:
-                        break
-                    frame_count += 1
+                    with open(input_video_path, 'rb') as in_video_file:
+                        in_video_bytes = in_video_file.read()
+                        st.video(in_video_bytes)
 
-                cap.release()
+    
+            with col2:
 
-                st.write("Frames detected by OpenCV:", frame_count)
+                st.subheader("🎥 Annotated Video")
+                if not st.session_state.video_processing_done:
+                    progress_bar = st.progress(0)
+                    status_text = st.empty()
+                else:
+                    progress_bar = None
+                    status_text = None
 
-            
+                output_video_path, video_stats, compliance = process_video(
+                    model,
+                    input_video_path,
+                    conf_threshold,
+                    fourcc,
+                    suffix,
+                    progress_bar=progress_bar,
+                    status_text=status_text
+                )
+                st.session_state.video_processing_done = True
+                progress_bar = st.empty()
+                status_text = st.empty()
 
-            with open(output_video_path, "rb") as video_file:
-                video_bytes = video_file.read()
-                st.success("Done!")
-                st.video(video_bytes)
-                st.write("Output path:", output_video_path)
-            
-            st.download_button(
-            label="Download output video",
-            data=video_bytes,
-            file_name="output.mp4",
-            mime="video/mp4"
-            )    
+                with open(output_video_path, "rb") as video_file:
+                    video_bytes = video_file.read()
+                    st.video(video_bytes)
 
-            #st.success("Done!")
-            #st.video(output_video_path)
+                st.download_button(
+                label="⬇️Download output video",
+                data=video_bytes,
+                file_name=f"output{suffix}",
+                mime=f"video/{suffix.split('.')[1]}"
+            )
+                
 
-        uploaded_file = st.file_uploader("Upload an image", type=['jpg', 'jpeg', 'png', 'bmp'])
+            st.markdown("---")
+            st.subheader("📊 Statistics")   
+            render_analytics(video_stats, compliance)
+
+        uploaded_file = st.file_uploader(
+            "Upload an image", type=["jpg", "jpeg", "png", "bmp"]
+        )
 
         if uploaded_file is not None:
             col1, col2 = st.columns(2)
@@ -309,7 +306,9 @@ def main():
                 st.image(image, use_column_width=True)
 
             with st.spinner("🔍 Analyzing..."):
-                results = run_inference(model, image, conf=conf_threshold, iou=iou_threshold) #model.predict(image, conf=conf_threshold, iou=iou_threshold, verbose=False)
+                results = run_inference(
+                    model, image, conf=conf_threshold, iou=iou_threshold
+                )  
                 stats = analyze_detections(results, conf_threshold)
                 compliance = calculate_compliance_rate(stats)
 
@@ -318,22 +317,13 @@ def main():
                 res_plotted = results[0].plot(labels=show_labels, conf=show_conf)
                 res_plotted_rgb = cv2.cvtColor(res_plotted, cv2.COLOR_BGR2RGB)
                 st.image(res_plotted_rgb, use_column_width=True)
+            
+            st.markdown("---")
+            st.subheader("📊 Statistics")   
+            render_analytics(stats, compliance)
 
             st.markdown("---")
-            st.subheader("📊 Statistics")
-
-            metric_cols = st.columns(4)
-            with metric_cols[0]:
-                st.markdown(f'<div class="metric-card"><div class="metric-value">{stats["total_detections"]}</div><div class="metric-label">Total</div></div>', unsafe_allow_html=True)
-            with metric_cols[1]:
-                st.markdown(f'<div class="metric-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);"><div class="metric-value">{stats["with_mask"]}</div><div class="metric-label">With Mask</div></div>', unsafe_allow_html=True)
-            with metric_cols[2]:
-                st.markdown(f'<div class="metric-card" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);"><div class="metric-value">{stats["without_mask"]}</div><div class="metric-label">Without Mask</div></div>', unsafe_allow_html=True)
-            with metric_cols[3]:
-                st.markdown(f'<div class="metric-card" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);"><div class="metric-value">{compliance:.1f}%</div><div class="metric-label">Compliance</div></div>', unsafe_allow_html=True)
-
-            st.markdown("---")
-            if stats['total_detections'] > 0:
+            if stats["total_detections"] > 0:
                 if compliance >= 80:
                     st.success(f"✅ High compliance: {compliance:.1f}%")
                 elif compliance >= 50:
@@ -341,44 +331,54 @@ def main():
                 else:
                     st.error(f"❌ Low compliance: {compliance:.1f}%")
 
-            if stats['detections']:
+            if stats["detections"]:
                 with st.expander("🔍 Detailed Detections"):
-                    for i, det in enumerate(stats['detections'], 1):
+                    for i, det in enumerate(stats["detections"], 1):
                         st.write(f"**{i}.** {det['class']} - {det['confidence']:.2%}")
 
             col_exp1, col_exp2 = st.columns(2)
             with col_exp1:
                 json_data = export_results(stats, uploaded_file.name)
-                st.download_button("📥 Download Report", json_data,
-                                 f"report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
-                                 "application/json")
+                st.download_button(
+                    "📥 Download Report",
+                    json_data,
+                    f"report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+                    "application/json",
+                )
             with col_exp2:
                 img_bytes = io.BytesIO()
-                PIL.Image.fromarray(res_plotted_rgb).save(img_bytes, format='PNG')
-                st.download_button("📥 Download Image", img_bytes.getvalue(),
-                                 f"annotated_{uploaded_file.name}", "image/png")
+                PIL.Image.fromarray(res_plotted_rgb).save(img_bytes, format="PNG")
+                st.download_button(
+                    "📥 Download Image",
+                    img_bytes.getvalue(),
+                    f"annotated_{uploaded_file.name}",
+                    "image/png",
+                )
 
-            st.session_state['stats'] = stats
-            st.session_state['compliance'] = compliance
+            st.session_state["stats"] = stats
+            st.session_state["compliance"] = compliance
 
     with tab2:
         st.subheader("📊 Analytics Dashboard")
-        if 'stats' in st.session_state:
+        if "stats" in st.session_state:
             import pandas as pd
-            stats = st.session_state['stats']
-            compliance = st.session_state['compliance']
 
-            data = {'Category': ['With Mask', 'Without Mask'],
-                   'Count': [stats['with_mask'], stats['without_mask']]}
+            stats = st.session_state["stats"]
+            compliance = st.session_state["compliance"]
+
+            data = {
+                "Category": ["With Mask", "Without Mask"],
+                "Count": [stats["with_mask"], stats["without_mask"]],
+            }
             df = pd.DataFrame(data)
 
             col1, col2 = st.columns(2)
             with col1:
                 st.subheader("Distribution")
-                st.bar_chart(df.set_index('Category'))
+                st.bar_chart(df.set_index("Category"))
             with col2:
                 st.subheader("Metrics")
-                st.metric("Total Detected", stats['total_detections'])
+                st.metric("Total Detected", stats["total_detections"])
                 st.metric("Compliance Rate", f"{compliance:.1f}%")
         else:
             st.info("📸 Upload an image to view analytics")
@@ -399,6 +399,7 @@ def main():
         - Moderate: 50-79% - Acceptable
         - Low: <50% - Needs attention
         """)
+
 
 if __name__ == "__main__":
     main()

@@ -68,11 +68,11 @@ def load_model(model_path: str = MODEL_PATH, device: str = DEFAULT_DEVICE) -> Tu
 ### Video processing
 
 def run_inference_on_frame(model, frame, conf):
-    results = model(frame, conf=conf)[0]
+    results = model(frame, conf=conf)
 
     annotated = frame.copy()
 
-    for box in results.boxes:
+    for box in results[0].boxes:
         x1, y1, x2, y2 = map(int, box.xyxy[0])
         cls_id = int(box.cls[0])
         confidence = float(box.conf[0])
@@ -91,7 +91,7 @@ def run_inference_on_frame(model, frame, conf):
             2,
         )
 
-    return annotated
+    return annotated, results
 
 
 def run_inference(
