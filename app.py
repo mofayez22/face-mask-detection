@@ -261,7 +261,7 @@ def main():
                     progress_bar = st.progress(0)
                     status_text = st.empty()
                 else:
-                    progress_bar = None
+                    progress_bar = None                   
                     status_text = None
 
                 output_video_path, video_stats, compliance = process_video(
@@ -273,9 +273,6 @@ def main():
                     progress_bar=progress_bar,
                     status_text=status_text
                 )
-                st.session_state.video_processing_done = True
-                progress_bar = st.empty()
-                status_text = st.empty()
 
                 with open(output_video_path, 'rb') as video_file:
                     video_bytes = video_file.read()
@@ -287,7 +284,9 @@ def main():
                 file_name=f"output{suffix}",
                 mime=f"video/{suffix.split('.')[1]}"
             )
-                
+                st.session_state.video_processing_done = True
+                progress_bar = st.empty()
+                status_text = st.empty()
 
             st.markdown("---")
             st.subheader("📊 Statistics")   
