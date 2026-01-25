@@ -264,7 +264,7 @@ def main():
                     progress_bar = None                   
                     status_text = None
 
-                output_video_path, video_stats, compliance = process_video(
+                video_bytes, video_stats, compliance = process_video(
                     model,
                     input_video_path,
                     conf_threshold,
@@ -273,13 +273,8 @@ def main():
                     progress_bar=progress_bar,
                     status_text=status_text
                 )
-                st.write("Output path:", output_video_path)
-                st.write("Exists:", os.path.exists(output_video_path))
-                st.write("Size:", os.path.getsize(output_video_path))
 
-                with open(output_video_path, 'rb') as video_file:
-                    video_bytes = video_file.read()
-                    st.video(video_bytes)
+                st.video(video_bytes)
 
                 st.download_button(
                 label="⬇️Download output video",

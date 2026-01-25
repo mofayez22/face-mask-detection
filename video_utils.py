@@ -80,7 +80,10 @@ def process_video(
     cap.release()
     out.release()
 
-    return output_path, video_stats, compliance
+    with open(output_path, 'rb') as f:
+        video_bytes = f.read()
+
+    return video_bytes, video_stats, compliance
 
 
 
