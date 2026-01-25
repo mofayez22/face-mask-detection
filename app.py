@@ -277,7 +277,7 @@ def main():
                 progress_bar = st.empty()
                 status_text = st.empty()
 
-                with open(output_video_path, "rb") as video_file:
+                with open(output_video_path, 'rb') as video_file:
                     video_bytes = video_file.read()
                     st.video(video_bytes)
 
