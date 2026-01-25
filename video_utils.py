@@ -77,12 +77,12 @@ def process_video(
             )
     compliance = (video_stats["with_mask"] / video_stats["total_detections"]) * 100
 
-    cap.release()
-    out.release()
-
     with open(output_path, 'rb') as f:
         video_bytes = f.read()
 
+    cap.release()
+    out.release()
+            
     return video_bytes, video_stats, compliance
 
 
