@@ -77,11 +77,16 @@ def process_video(
             )
     compliance = (video_stats["with_mask"] / video_stats["total_detections"]) * 100
 
-    with open(output_path, 'rb') as f:
-        video_bytes = f.read()
 
     cap.release()
     out.release()
+
+    print(f"####################Output path:{output_path}" )
+    print(f"Exists: {os.path.exists(output_path)}" )
+    print(f"Size:{os.path.getsize(output_path)}")
+
+    with open(output_path, 'rb') as f:
+        video_bytes = f.read()
             
     return video_bytes, video_stats, compliance
 
