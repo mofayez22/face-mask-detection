@@ -286,7 +286,7 @@ def main():
                     status_text.empty()
 
 
-                st.video(st.video_bytes)
+                st.video(video_bytes)
 
                 st.download_button(
                     "⬇️ Download output video",
