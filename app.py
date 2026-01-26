@@ -279,8 +279,8 @@ def main():
                 st.download_button(
                 label="⬇️Download output video",
                 data=video_bytes,
-                file_name=f"output{suffix}",
-                mime=f"video/{suffix.split('.')[1]}"
+                file_name=f"output.mp4",
+                mime=f"video/.mp4"
             )
                 st.session_state.video_processing_done = True
                 progress_bar = st.empty()
