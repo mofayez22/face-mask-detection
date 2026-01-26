@@ -78,13 +78,14 @@ def process_video(
 
     cap.release()
     out.release()
-
-    print(f"####################Output path:{output_path}" )
-    print(f"Exists: {os.path.exists(output_path)}" )
-    print(f"Size:{os.path.getsize(output_path)}")
-
+    
     with open(output_path, 'rb') as f:
         video_bytes = f.read()
+
+    print(f"####################Output path:{output_path}" )
+    print(f"Video bytes are here: {type(video_bytes)}" )
+
+    
             
     return video_bytes, video_stats, compliance
 
