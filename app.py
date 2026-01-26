@@ -259,12 +259,6 @@ def main():
             with col2:
 
                 st.subheader("🎥 Annotated Video")
-                """if not st.session_state.video_processing_done:
-                    progress_bar = st.progress(0)
-                    status_text = st.empty()
-                else:
-                    progress_bar = None                   
-                    status_text = None"""
 
                 if "video_result" not in st.session_state:
                     progress_bar = st.progress(0)
