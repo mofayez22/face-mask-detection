@@ -234,20 +234,10 @@ def main():
         if video_file:
           
             col1, col2 = st.columns(2)
-
-            """if platform == "windows":
-                fourcc = cv2.VideoWriter_fourcc(*"XVID")
-                suffix = ".avi"
-            else:
-                fourcc = cv2.VideoWriter_fourcc(*"mpv4")
-                suffix = ".mp4"
-            """
                 
             with col1:
                 st.subheader("🎥 Original Video")
-                with tempfile.NamedTemporaryFile(
-                    delete=False, suffix=".mp4"
-                ) as temp_vid:
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_vid:
                     temp_vid.write(video_file.read())
                     input_video_path = temp_vid.name
 
@@ -280,7 +270,7 @@ def main():
                     status_text.empty()
 
 
-                st.video(video_bytes)
+                st.video(st.session_state.video_result)
 
                 st.download_button(
                     "⬇️ Download output video",
@@ -289,13 +279,9 @@ def main():
                     mime="video/mp4"
                 )
 
-                """st.session_state.video_processing_done = True
-                progress_bar = st.empty()
-                status_text = st.empty()"""
-
             st.markdown("---")
             st.subheader("📊 Statistics")   
-            render_analytics(video_stats, compliance)
+            render_analytics(st.session_state.video_stats, st.session_state.video_compliance)
 
         uploaded_file = st.file_uploader(
             "Upload an image", type=["jpg", "jpeg", "png", "bmp"]
