@@ -18,13 +18,12 @@ def process_video(
     model,
     input_video_path,
     conf,
-    fourcc,
-    suffix,
     progress_bar=None,
     status_text=None
 ):
-    output_path = os.path.join(tempfile.gettempdir(), f"output{suffix}")
-
+    output_path = os.path.join(tempfile.gettempdir(), f"output.mp4")
+    
+    fourcc = cv2.VideoWriter_fourcc(*"mpv4")
     cap = cv2.VideoCapture(input_video_path)
 
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))

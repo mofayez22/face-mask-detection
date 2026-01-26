@@ -235,16 +235,18 @@ def main():
           
             col1, col2 = st.columns(2)
 
-            if platform == "windows":
+            """if platform == "windows":
                 fourcc = cv2.VideoWriter_fourcc(*"XVID")
                 suffix = ".avi"
             else:
                 fourcc = cv2.VideoWriter_fourcc(*"mpv4")
                 suffix = ".mp4"
+            """
+                
             with col1:
                 st.subheader("🎥 Original Video")
                 with tempfile.NamedTemporaryFile(
-                    delete=False, suffix=suffix
+                    delete=False, suffix=".mp4"
                 ) as temp_vid:
                     temp_vid.write(video_file.read())
                     input_video_path = temp_vid.name
@@ -268,8 +270,6 @@ def main():
                     model,
                     input_video_path,
                     conf_threshold,
-                    fourcc,
-                    suffix,
                     progress_bar=progress_bar,
                     status_text=status_text
                 )
