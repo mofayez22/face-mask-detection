@@ -21,14 +21,12 @@ def process_video(
     progress_bar=None,
     status_text=None
 ):
-    output_path = os.path.join(tempfile.gettempdir(), "output.mp4")
-    
-    fourcc = cv2.VideoWriter_fourcc(*"mpv4")
-    cap = cv2.VideoCapture(input_video_path)
+    # unique temp file per run
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as tmp:
+        output_path = tmp.name
 
-    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    if total_frames <= 0:
-        total_frames = None
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    cap = cv2.VideoCapture(input_video_path)
 
     ret, frame = cap.read()
     if not ret:
@@ -39,6 +37,7 @@ def process_video(
 
     out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)) or None
     video_stats = init_video_stats()
     frame_idx = 0
 
@@ -51,7 +50,6 @@ def process_video(
                 break
 
         annotated, results = run_inference_on_frame(model, current_frame, conf)
-
         frame_stats = analyze_detections(results, conf)
 
         video_stats["total_frames"] += 1
@@ -69,23 +67,22 @@ def process_video(
             progress_bar.progress(min(frame_idx / total_frames, 1.0))
 
         if status_text:
-            status_text.text(
-                f"Processing frame {frame_idx}" +
-                (f" / {total_frames}" if total_frames else "")
-            )
-    compliance = (video_stats["with_mask"] / video_stats["total_detections"]) * 100
-
+            status_text.text(f"Processing frame {frame_idx}/{total_frames}")
 
     cap.release()
     out.release()
-    
-    with open(output_path, 'rb') as f:
-        video_bytes = f.read()
-        print(f"####################Output path:{output_path}" )
-        print(f"Video bytes are here: {type(video_bytes)}" )
 
-    
-            
+    with open(output_path, "rb") as f:
+        video_bytes = f.read()
+
+    os.remove(output_path)  # ✅ safe now
+
+    compliance = (
+        (video_stats["with_mask"] / video_stats["total_detections"]) * 100
+        if video_stats["total_detections"] > 0
+        else 0
+    )
+
     return video_bytes, video_stats, compliance
 
 

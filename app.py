@@ -259,32 +259,45 @@ def main():
             with col2:
 
                 st.subheader("🎥 Annotated Video")
-                if not st.session_state.video_processing_done:
+                """if not st.session_state.video_processing_done:
                     progress_bar = st.progress(0)
                     status_text = st.empty()
                 else:
                     progress_bar = None                   
-                    status_text = None
+                    status_text = None"""
 
-                video_bytes, video_stats, compliance = process_video(
-                    model,
-                    input_video_path,
-                    conf_threshold,
-                    progress_bar=progress_bar,
-                    status_text=status_text
-                )
+                if "video_result" not in st.session_state:
+                    progress_bar = st.progress(0)
+                    status_text = st.empty()
 
-                st.video(video_bytes)
+                    video_bytes, video_stats, compliance = process_video(
+                        model,
+                        input_video_path,
+                        conf_threshold,
+                        progress_bar=progress_bar,
+                        status_text=status_text
+                    )
+
+                    st.session_state.video_result = video_bytes
+                    st.session_state.video_stats = video_stats
+                    st.session_state.video_compliance = compliance
+
+                    progress_bar.empty()
+                    status_text.empty()
+
+
+                st.video(st.session_state.video_result)
 
                 st.download_button(
-                label="⬇️Download output video",
-                data=video_bytes,
-                file_name=f"output.mp4",
-                mime=f"video/.mp4"
-            )
-                st.session_state.video_processing_done = True
+                    "⬇️ Download output video",
+                    data=st.session_state.video_result,
+                    file_name="output.mp4",
+                    mime="video/mp4"
+                )
+
+                """st.session_state.video_processing_done = True
                 progress_bar = st.empty()
-                status_text = st.empty()
+                status_text = st.empty()"""
 
             st.markdown("---")
             st.subheader("📊 Statistics")   
