@@ -21,7 +21,7 @@ def process_video(
     progress_bar=None,
     status_text=None
 ):
-    output_path = os.path.join(tempfile.gettempdir(), f"output.mp4")
+    output_path = os.path.join(tempfile.gettempdir(), "output.mp4")
     
     fourcc = cv2.VideoWriter_fourcc(*"mpv4")
     cap = cv2.VideoCapture(input_video_path)
@@ -81,9 +81,8 @@ def process_video(
     
     with open(output_path, 'rb') as f:
         video_bytes = f.read()
-
-    print(f"####################Output path:{output_path}" )
-    print(f"Video bytes are here: {type(video_bytes)}" )
+        print(f"####################Output path:{output_path}" )
+        print(f"Video bytes are here: {type(video_bytes)}" )
 
     
             
