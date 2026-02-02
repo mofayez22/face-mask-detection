@@ -9,7 +9,7 @@ An End-to-end face mask detection system powered by YOLOv8 and Streamlit. This a
 ## ✨ Features
 
 - 🎯 **Real-time Detection**: Accurate face mask detection using YOLOv8
-- 📽️ **Video Processing**: upload with frame-by-frame detection
+- 📽️ **Video Processing**: upload a video and process it frame-by-frame 
 - 📊 **Analytics Dashboard**: Comprehensive statistics and compliance metrics
 - 🎨 **Interactive UI**: Beautiful and intuitive Streamlit interface
 - 📥 **Export Options**: Download JSON reports and annotated images
